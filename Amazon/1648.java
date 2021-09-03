@@ -26,16 +26,17 @@ class Solution {
         int rows = order / width;
         if (rows >= height) {
             // update order
-            order -= rows * width;
+            order -= height * width;
+            // System.out.println(order);
             profit += ((rangeSum(min, max) % DIVISOR) * width) % DIVISOR;
             Arrays.fill(inventory, lo, hi + 1, min - 1);
         } else {
             profit += ((rangeSum(max - rows + 1, max) % DIVISOR) * width) % DIVISOR;
             order %= width;
-            profit += ((max - rows) * order) % DIVISOR;
+            profit += ((long)(max - rows) * order) % DIVISOR;
             order = 0;
         }
-
+        
         return profit % DIVISOR;
     }
 
