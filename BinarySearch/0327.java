@@ -1,23 +1,22 @@
-class Node {
-    private int key;
-    private int val;
-    private int size;
-    private int height;
-    private Node left, right;
-    public Node(int key) {
-        this.key = key; val = 1; size = 1; height = 1;
-    }
-}
-
 class Tree {
+    private static class Node {
+        private long key;
+        private long val;
+        private long size;
+        private long height;
+        private Node left, right;
+        public Node(long key) {
+            this.key = key; val = 1; size = 1; height = 1;
+        }
+    }
     private Node root;
 
     public Tree() {}
 
-    public void insert(int key) {   root = insert(root, key);   }
-    private static Node insert(Node node, int key) {
+    public void insert(long key) {   root = insert(root, key);   }
+    private static Node insert(Node node, long key) {
         if (node == null) { return new Node(key);   }
-        int cmp = Integer.compare(key, node.key);
+        long cmp = Long.compare(key, node.key);
         if (cmp < 0) {  node.left = insert(node.left, key); }
         else if (cmp > 0) { node.right = insert(node.right, key);   }
         else {  node.val++; }
@@ -31,7 +30,7 @@ class Tree {
     }
 
     private static Node balance(Node node) {
-        int diff = balanceFactor(node);
+        long diff = balanceFactor(node);
         // Case 1: left leaning
         if (diff > 1) {
             // Case 1.1 left right leaning
@@ -54,16 +53,48 @@ class Tree {
         return r;
     }
 
-    private static int balanceFactor(Node node) {   return height(node.left) - height(node.right);  } 
+    private static Node rotateRight(Node node) {
+        Node l = node.left;
+        node.left = l.right;
+        l.right = node;
+        updateParams(node);
+        updateParams(l);
+        return l;
+    }
+    private static long balanceFactor(Node node) {   return height(node.left) - height(node.right);  } 
 
-    private static int size(Node node) {    return node == null ? 0 : node.size;    }
-    private static int height(Node node) {  return node == null ? 0 : node.height;  }
+    private static long size(Node node) {    return node == null ? 0 : node.size;    }
+    private static long height(Node node) {  return node == null ? 0 : node.height;  }
 
-    public int rank(int key) {}
+    public long rank(long key) {
+        return rank(root, key);
+    }
+
+    private static long rank(Node node, long key) {
+        if (node == null) { return 0;   }
+        long cmp = Long.compare(key, node.key);
+        if (cmp < 0) {  return rank(node.left, key);    }
+        else if (cmp > 0) { return size(node.left) + node.val + rank(node.right, key);  }
+        else {  return size(node.left);   }
+    }
 }
 
 class Solution {
+    private Tree tree;
     public int countRangeSum(int[] nums, int lower, int upper) {
-        
+        tree = new Tree();
+        tree.insert(0);
+        long prefixSum = 0;
+        int counter = 0;
+        for (long num : nums) {
+            prefixSum += num;
+            long lo = prefixSum - upper;
+            long hi = prefixSum - lower;
+            long r1 = tree.rank(lo);
+            long r2 = tree.rank(hi + 1);
+            counter += r2 - r1;
+            tree.insert(prefixSum);
+        }
+        return counter;
     }
 }
